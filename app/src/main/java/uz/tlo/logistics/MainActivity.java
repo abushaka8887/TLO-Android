@@ -104,7 +104,8 @@ public class MainActivity extends Activity {
       else if("inlineStr".equals(type))v=text(c,"t");
       values[col]=v;
      }
-     boolean populated=k==0;for(String v:values){if(!v.trim().isEmpty()){populated=true;break;}}\n     if(populated){JSONArray a=new JSONArray();for(String v:values)a.put(v);rows.put(a);}
+     boolean populated=k==0;for(String v:values){if(!v.trim().isEmpty()){populated=true;break;}}
+     if(populated){JSONArray a=new JSONArray();for(String v:values)a.put(v);rows.put(a);}
     }
     return rows;
    }
