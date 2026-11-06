@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
  @Override protected void onActivityResult(int request,int result,Intent data){
   super.onActivityResult(request,result,data);
   if(request!=PICK_XLSX)return;
-  if(fileCallback!=null){fileCallback.onReceiveValue(result==RESULT_OK&&data!=null&&data.getData()!=null?new Uri[]{data.getData()}:null);fileCallback=null;return;}
+  if(fileCallback!=null){fileCallback.onReceiveValue(result==RESULT_OK&&data!=null&&data.getData()!=null?new Uri[]{data.getData()}:null);fileCallback=null;}
   if(result!=RESULT_OK||data==null)return;
   try{
    JSONArray rows=readExcel(data.getData());
