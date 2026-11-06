@@ -21,7 +21,8 @@ function parseCSV(t){let out=[],r=[],v='',q=false;for(let i=0;i<t.length;i++){le
 async function importCSV(el){let f=el.files[0];if(!f)return;let rows=parseCSV((await f.text()).replace(/^\uFEFF/,''));let headers=rows.shift().map(x=>x.trim().toLowerCase());let key=['kompaniya','mijoz','telefon','manzil','summa','tolov','kuryer'];if(!key.every(x=>headers.includes(x))){alert('CSV ustunlari mos emas. Namuna fayldan foydalaning.');return}let added=0;for(let r of rows){let d=Object.fromEntries(key.map(k=>[k,r[headers.indexOf(k)]||'']));if(!d.mijoz||!d.telefon||!d.manzil||!Number.isFinite(Number(d.summa)))continue;orders.unshift({id:Date.now()+Math.random(),date:new Date().toISOString(),company:d.kompaniya,client:d.mijoz,phone:d.telefon,address:d.manzil,amount:Number(d.summa),payment:/karta/i.test(d.tolov)?'Karta':'Naqd',courier:d.kuryer,status:d.kuryer?'Berilgan':'Berilmagan'});if(d.kompaniya&&!companies.includes(d.kompaniya))companies.push(d.kompaniya);added++}save();alert(added+' ta buyurtma yuklandi')}
 
 function importExcelRows(rows){
- if(!Array.isArray(rows)||rows.length<2){alert('Excel bo‘sh');return}
+ try{
+ if(!Array.isArray(rows)||rows.length<2){alert('Excel bo‘sh yoki buyurtmalar topilmadi');return 'ERROR: Excel bo‘sh'}
  const norm=x=>String(x??'').trim().toLocaleUpperCase();
  const h=rows[0].map(norm);
  const required=['ID RAQAM','MIJOZ ISMI','VILOYAT','MANZIL','SUMMASI'];
@@ -41,7 +42,8 @@ function importExcelRows(rows){
   orders.unshift({id:Date.now()+Math.random(),externalId:id,date:new Date().toISOString(),client,phone:phones[0]||'',phones,address:[region,district,address].filter(Boolean).join(', '),region,district,products,specialist,amount,payment:'Naqd',company:'',courier:'',status:'Berilmagan'});
   added++;
  }
- save();alert(added+' ta buyurtma yuklandi. Takroriy: '+duplicate+'. O‘tkazib yuborildi: '+skipped+'.');
+ save();alert(added+' ta buyurtma yuklandi. Takroriy: '+duplicate+'. O‘tkazib yuborildi: '+skipped+'.');return 'OK: '+added;
+ }catch(e){alert('Excel import xatosi: '+e.message);return 'ERROR: '+e.message}
 }
 function chooseExcel(){try{if(window.TLOAndroid&&typeof window.TLOAndroid.chooseExcel==='function'){window.TLOAndroid.chooseExcel()}else{alert('Android fayl tanlash xizmati ulanmagan. Yangi APKni o‘rnating.')}}catch(e){alert('Excel tanlash xatosi: '+e.message)}}
 
