@@ -67,13 +67,19 @@ public class MainActivity extends Activity {
   }
  }
  static Document parse(byte[] b)throws Exception{
+  // XLSX internal XML must not contain a DTD or external entities.
+  String xml=new String(b,java.nio.charset.StandardCharsets.UTF_8);
+  if(xml.contains("<!DOCTYPE")||xml.contains("<!ENTITY"))throw new IOException("Excel XML xavfsizlik tekshiruvidan o'tmadi");
   DocumentBuilderFactory f=DocumentBuilderFactory.newInstance();
-  f.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
-  f.setFeature("http://xml.org/sax/features/external-general-entities",false);
-  f.setFeature("http://xml.org/sax/features/external-parameter-entities",false);
+  f.setNamespaceAware(false);
   f.setExpandEntityReferences(false);
-  return f.newDocumentBuilder().parse(new ByteArrayInputStream(b));
+  try{f.setFeature("http://xml.org/sax/features/external-general-entities",false);}catch(javax.xml.parsers.ParserConfigurationException ignored){}
+  try{f.setFeature("http://xml.org/sax/features/external-parameter-entities",false);}catch(javax.xml.parsers.ParserConfigurationException ignored){}
+  DocumentBuilder builder=f.newDocumentBuilder();
+  builder.setEntityResolver((publicId,systemId)->{throw new org.xml.sax.SAXException("External XML entities disabled");});
+  return builder.parse(new ByteArrayInputStream(b));
  }
+
  static byte[] entry(ZipFile z,String name)throws Exception{
   ZipEntry e=z.getEntry(name);if(e==null)return null;
   if(e.getSize()>12000000)throw new IOException("Fayl juda katta");
