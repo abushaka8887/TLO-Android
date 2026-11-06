@@ -39,11 +39,12 @@ public class MainActivity extends Activity {
  public class Bridge {
   @JavascriptInterface public void chooseExcel(){
    runOnUiThread(()->{
-    Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+    try {Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);
     i.setType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     i.addCategory(Intent.CATEGORY_OPENABLE);
     i.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/octet-stream"});
     startActivityForResult(i,PICK_XLSX);
+    }catch(Exception ex){Toast.makeText(MainActivity.this,"Excel tanlash oynasi ochilmadi: "+ex.getMessage(),Toast.LENGTH_LONG).show();}
    });
   }
  }
