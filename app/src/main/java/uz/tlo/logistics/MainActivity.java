@@ -9,6 +9,9 @@ import android.webkit.WebChromeClient;
 import android.webkit.ValueCallback;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
+import android.media.ToneGenerator;
+import android.media.AudioManager;
+import android.view.WindowManager;
 import org.json.JSONArray;
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -37,6 +40,8 @@ public class MainActivity extends Activity {
   w.loadUrl("file:///android_asset/index.html");
  }
  public class Bridge {
+  @JavascriptInterface public void playSignal(){runOnUiThread(()->{ToneGenerator t=new ToneGenerator(AudioManager.STREAM_NOTIFICATION,80);t.startTone(ToneGenerator.TONE_PROP_BEEP,250);new android.os.Handler().postDelayed(t::release,400);});}
+  @JavascriptInterface public void setKeepAwake(boolean enabled){runOnUiThread(()->{if(enabled)getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);});}
   @JavascriptInterface public void chooseExcel(){
    runOnUiThread(()->{
     try {Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);
