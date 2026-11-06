@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
   try{
    JSONArray rows=readExcel(data.getData());
    String json=rows.toString();
-   w.evaluateJavascript("importExcelRows("+json+")",null);
+   w.evaluateJavascript("importExcelRows("+json+")", value -> {if(value!=null&&value.contains("ERROR"))Toast.makeText(MainActivity.this,value,Toast.LENGTH_LONG).show();});
   }catch(Exception ex){
    Toast.makeText(this,"Excel o'qilmadi: "+ex.getMessage(),Toast.LENGTH_LONG).show();
   }
@@ -104,7 +104,7 @@ public class MainActivity extends Activity {
       else if("inlineStr".equals(type))v=text(c,"t");
       values[col]=v;
      }
-     JSONArray a=new JSONArray();for(String v:values)a.put(v);rows.put(a);
+     boolean populated=k==0;for(String v:values){if(!v.trim().isEmpty()){populated=true;break;}}\n     if(populated){JSONArray a=new JSONArray();for(String v:values)a.put(v);rows.put(a);}
     }
     return rows;
    }
