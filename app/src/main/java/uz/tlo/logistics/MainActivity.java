@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebChromeClient;
+import android.webkit.ValueCallback;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 import org.json.JSONArray;
@@ -17,9 +19,18 @@ import java.util.zip.*;
 public class MainActivity extends Activity {
  WebView w;
  static final int PICK_XLSX=120;
+ ValueCallback<Uri[]> fileCallback;
  public void onCreate(Bundle b){
   super.onCreate(b);w=new WebView(this);setContentView(w);
   w.setWebViewClient(new WebViewClient());
+  w.setWebChromeClient(new WebChromeClient(){
+   @Override public boolean onShowFileChooser(WebView webView,ValueCallback<Uri[]> callback,FileChooserParams params){
+    if(fileCallback!=null)fileCallback.onReceiveValue(null);
+    fileCallback=callback;
+    try{Intent intent=new Intent(Intent.ACTION_OPEN_DOCUMENT);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.setType("*/*");intent.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/octet-stream"});startActivityForResult(intent,PICK_XLSX);return true;}
+    catch(Exception ex){fileCallback=null;callback.onReceiveValue(null);Toast.makeText(MainActivity.this,"Fayl tanlash ochilmadi",Toast.LENGTH_LONG).show();return true;}
+   }
+  });
   w.getSettings().setJavaScriptEnabled(true);
   w.getSettings().setDomStorageEnabled(true);
   w.addJavascriptInterface(new Bridge(),"TLOAndroid");
@@ -38,7 +49,9 @@ public class MainActivity extends Activity {
  }
  @Override protected void onActivityResult(int request,int result,Intent data){
   super.onActivityResult(request,result,data);
-  if(request!=PICK_XLSX||result!=RESULT_OK||data==null)return;
+  if(request!=PICK_XLSX)return;
+  if(fileCallback!=null){fileCallback.onReceiveValue(result==RESULT_OK&&data!=null&&data.getData()!=null?new Uri[]{data.getData()}:null);fileCallback=null;return;}
+  if(result!=RESULT_OK||data==null)return;
   try{
    JSONArray rows=readExcel(data.getData());
    String json=rows.toString();
